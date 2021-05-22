@@ -17,14 +17,14 @@ type LoginCmd struct {
 }
 
 var cli struct {
-	Signup SignupCmd `cmd:"" help:"Signup for mpm"`
-	Login  LoginCmd  `cmd:"" help:"Login to mpm"`
+	Signup SignupCmd `cmd:"" help:"Signup for the mpm service"`
+	Login  LoginCmd  `cmd:"" help:"Login to mpm service"`
 }
 
 func main() {
 	ctx := kong.Parse(&cli,
 		kong.Name("mpmclient"),
-		kong.Description("Client for mpm server"),
+		kong.Description("Client for the mpm server"),
 		kong.UsageOnError(),
 		kong.ConfigureHelp(kong.HelpOptions{
 			Compact: true,
