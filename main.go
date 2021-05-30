@@ -57,7 +57,7 @@ func main() {
 				log.Fatal(err)
 			}
 		} else {
-			fmt.Println("request can only be add, get or del")
+			fmt.Println("request can only be add, get, del, update or delAcc")
 			os.Exit(1)
 		}
 	}
