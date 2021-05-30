@@ -13,7 +13,7 @@ type SignupCmd struct {
 }
 
 type LoginCmd struct {
-	RequestType string `arg:"" help:"Can be add, get or del" type:"request" name:"request"`
+	RequestType string `arg:"" help:"Can be add, get, del, update or delAcc" type:"request" name:"request"`
 }
 
 var cli struct {
@@ -46,6 +46,14 @@ func main() {
 			}
 		} else if cli.Login.RequestType == "del" {
 			if err := client.Login(2); err != nil {
+				log.Fatal(err)
+			}
+		} else if cli.Login.RequestType == "update" {
+			if err := client.Login(3); err != nil {
+				log.Fatal(err)
+			}
+		} else if cli.Login.RequestType == "delAcc" {
+			if err := client.Login(4); err != nil {
 				log.Fatal(err)
 			}
 		} else {
