@@ -24,6 +24,8 @@ const (
 	post ReqType = iota
 	get
 	del
+	update
+	delAcc
 )
 
 type credentialsRequest struct {
@@ -41,21 +43,20 @@ func Login(rt uint8) error {
 	var req *http.Request
 	if ReqType(rt) == post {
 		req, err = postSecrets(creds)
-		if err != nil {
-			return err
-		}
 	} else if ReqType(rt) == get {
 		req, err = getSecrets(creds)
-		if err != nil {
-			return err
-		}
+	} else if ReqType(rt) == update {
+		req, err = updateSecrets(creds)
 	} else if ReqType(rt) == del {
+		req, err = delSecrets(creds)
+	} else if ReqType(rt) == delAcc {
 		req, err = delAccount(creds)
-		if err != nil {
-			return err
-		}
 	} else {
 		return errors.New("unknown request type")
+	}
+
+	if err != nil {
+		return err
 	}
 
 	client := &http.Client{}
@@ -158,6 +159,50 @@ func enterCredentials(signup bool) (credentialsRequest, error) {
 }
 
 func postSecrets(creds credentialsRequest) (*http.Request, error) {
+	return prepareSecrets(creds, "POST")
+}
+
+func updateSecrets(creds credentialsRequest) (*http.Request, error) {
+	return prepareSecrets(creds, "PATCH")
+}
+
+func delSecrets(creds credentialsRequest) (*http.Request, error) {
+	return prepareSecrets(creds, "DELETE")
+}
+
+func getSecrets(creds credentialsRequest) (*http.Request, error) {
+	mashalledCreds, err := json.Marshal(creds)
+	if err != nil {
+		return &http.Request{}, err
+	}
+
+	reader := strings.NewReader(string(mashalledCreds))
+
+	req, err := http.NewRequest("GET", "http://localhost:2000/login", reader)
+	if err != nil {
+		return &http.Request{}, err
+	}
+
+	return req, nil
+}
+
+func delAccount(creds credentialsRequest) (*http.Request, error) {
+	mashalledCreds, err := json.Marshal(creds)
+	if err != nil {
+		return &http.Request{}, err
+	}
+
+	reader := strings.NewReader(string(mashalledCreds))
+
+	req, err := http.NewRequest("DELETE", "http://localhost:2000/users", reader)
+	if err != nil {
+		return &http.Request{}, err
+	}
+
+	return req, nil
+}
+
+func prepareSecrets(creds credentialsRequest, method string) (*http.Request, error) {
 	secrets := make(map[string]string)
 	for {
 		service, err := getUserInput("\nEnter service name: ")
@@ -187,46 +232,13 @@ func postSecrets(creds credentialsRequest) (*http.Request, error) {
 
 	mashalledCreds, err := json.Marshal(creds)
 	if err != nil {
-		return &http.Request{}, err
+		return nil, err
 	}
 
 	reader := strings.NewReader(string(mashalledCreds))
-
-	req, err := http.NewRequest("POST", "http://localhost:2000/login", reader)
+	req, err := http.NewRequest(method, "http://localhost:2000/login", reader)
 	if err != nil {
-		return &http.Request{}, err
-	}
-
-	return req, nil
-}
-
-func getSecrets(creds credentialsRequest) (*http.Request, error) {
-	mashalledCreds, err := json.Marshal(creds)
-	if err != nil {
-		return &http.Request{}, err
-	}
-
-	reader := strings.NewReader(string(mashalledCreds))
-
-	req, err := http.NewRequest("GET", "http://localhost:2000/login", reader)
-	if err != nil {
-		return &http.Request{}, err
-	}
-
-	return req, nil
-}
-
-func delAccount(creds credentialsRequest) (*http.Request, error) {
-	mashalledCreds, err := json.Marshal(creds)
-	if err != nil {
-		return &http.Request{}, err
-	}
-
-	reader := strings.NewReader(string(mashalledCreds))
-
-	req, err := http.NewRequest("DELETE", "http://localhost:2000/login", reader)
-	if err != nil {
-		return &http.Request{}, err
+		return nil, err
 	}
 
 	return req, nil
